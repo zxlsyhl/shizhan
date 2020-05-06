@@ -1,0 +1,6 @@
+server:
+  port: 9000
+logging:
+  file: cache-redis.log
+  level:
+    org.zxl.shizhan.hbase: debug
