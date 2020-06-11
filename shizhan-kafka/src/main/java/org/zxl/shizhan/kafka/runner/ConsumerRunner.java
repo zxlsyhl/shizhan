@@ -4,6 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,9 @@ import org.zxl.shizhan.kafka.config.KafkaConfig;
 import org.zxl.shizhan.kafka.properties.KafkaProperties;
 import org.zxl.shizhan.kafka.tool.KafkaTool;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -70,6 +73,23 @@ public class ConsumerRunner implements ApplicationRunner {
         public void run() {
             KafkaConsumer<String, String> kafkaConsumer = kafkaConsumer();
             kafkaConsumer.subscribe(Arrays.asList(topicName));
+            //消费者指定分区消费，不会引发分区重新平衡
+            TopicPartition partition0 = new TopicPartition(topicName, 0);
+            TopicPartition partition1 = new TopicPartition(topicName, 1);
+            kafkaConsumer.assign(Arrays.asList(partition0, partition1));
+
+            //指定offset位置消费
+            int partOffset1 = 100,partOffset2 = 100;
+            kafkaConsumer.seek(partition0, partOffset1);
+            kafkaConsumer.seek(partition1, partOffset2);
+
+            //用于查找服务器保留的最早和最新的offset的特殊的方法
+//            List<TopicPartition> topicPartitions = new ArrayList<>();
+//            topicPartitions.add(partition0);
+//            topicPartitions.add(partition1);
+//            kafkaConsumer.seekToBeginning(topicPartitions);
+//            kafkaConsumer.seekToBeginning(topicPartitions);
+
             ConsumerRecords<String,String> records = null;
             try {
                 while (true){

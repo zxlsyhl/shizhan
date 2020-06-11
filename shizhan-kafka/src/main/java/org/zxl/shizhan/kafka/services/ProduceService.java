@@ -25,6 +25,7 @@ public class ProduceService {
                 }
             }
         });
+        kafkaProducer.close(); //用完需要关闭 不然会泄露消息
 
     }
 
